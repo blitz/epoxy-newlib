@@ -26,6 +26,9 @@ _start:
   addi  gp, gp, %pcrel_lo(1b)
 .option pop
 
+  # Load stack pointer
+  la      sp, _stack_end	
+	
   # Clear the bss segment
   la      a0, _edata
   la      a2, _end
@@ -48,9 +51,24 @@ _start:
 #endif
   call    __libc_init_array       # Run global initialization functions
 
-  lw      a0, 0(sp)                  # a0 = argc
-  addi    a1, sp, __SIZEOF_POINTER__ # a1 = argv
+  li      a0, 1                      # a0 = argc
+  la      a1, _argv                  # a1 = argv
   li      a2, 0                      # a2 = envp = NULL
   call    main
   tail    exit
   .size  _start, .-_start
+
+
+.section        .rodata,"a",@progbits
+_argv:	.word   _arg0
+	.word   0
+_arg0:
+        .asciz  "(unknown)"
+        .size   msg, 10
+	
+.bss
+.p2align        12
+_stack:
+        .zero   4096
+        .size   stack, 4096
+_stack_end:
