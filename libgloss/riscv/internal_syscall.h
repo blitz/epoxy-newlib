@@ -21,13 +21,8 @@ __syscall_error(long a0)
   return -1;
 }
 
-extern long (* const __syscall_impl)(long, long, long, long, long, long, long);
-
-static inline long
-__internal_syscall(long n, int argc, long _a0, long _a1, long _a2, long _a3, long _a4, long _a5)
-{
-  return __syscall_impl(n, _a0, _a1, _a2, _a3, _a4, _a5);
-}
+long
+__internal_syscall(long n, int argc, long _a0, long _a1, long _a2, long _a3, long _a4, long _a5);
 
 static inline long
 syscall_errno(long n, int argc, long _a0, long _a1, long _a2, long _a3, long _a4, long _a5)
