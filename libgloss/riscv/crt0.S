@@ -26,12 +26,22 @@ _start:
   addi  gp, gp, %pcrel_lo(1b)
 .option pop
 
+  # The kernel passes our heap and its end in a0, a1. We need to keep
+  # it around.
+  mv      s0, a0
+  mv      s1, a1
+
   # Clear the bss segment
   la      a0, _edata
   la      a2, _end
   sub     a2, a2, a0
   li      a1, 0
   call    memset
+
+  # Configure our heap. See sys_impl.c.
+  sw      s0, _heap_start, t0
+  sw      s1, _heap_end, t0	
+	
 #ifdef _LITE_EXIT
   # Make reference to atexit weak to avoid unconditionally pulling in
   # support code.  Refer to comments in __atexit.c for more details.

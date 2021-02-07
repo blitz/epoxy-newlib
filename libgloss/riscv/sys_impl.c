@@ -29,13 +29,6 @@ static syscall_result_t invoke(cap_t cap,
   return (syscall_result_t)(result);
 }
 
-/*
-  The amount of heap that we can allocate via the brk() "system call".
-
-  TODO: This should be configurable without recompiling the toolchain.
- */
-#define USER_HEAP_SIZE (256U << 10)
-
 static void write_string(char const *str)
 {
   while (*str != 0) {
@@ -70,20 +63,19 @@ static long sys_close(int file)
   }
 }
 
+/* These are set in crt0.S. */
+uintptr_t _heap_start;
+uintptr_t _heap_end;
+
 static long sys_brk(unsigned long new_brk)
 {
-  static char heap[USER_HEAP_SIZE] __attribute__((aligned(4096)));
-
-  uintptr_t const heap_start = (uintptr_t)(&heap[0]);
-  uintptr_t const heap_end = heap_start + sizeof(heap);
-
   // Query brk
   if (new_brk == 0) {
-    return heap_start;
+    return _heap_start;
   }
 
   // Set brk
-  if (new_brk >= heap_start && new_brk < heap_end) {
+  if (new_brk >= _heap_start && new_brk < _heap_end) {
     return new_brk;
   }
 
